@@ -1,0 +1,395 @@
+openapi: 3.0.3
+info:
+  description: |
+    Demo API for an order system with draft editing, OTP verification,
+    and admin review flow. Designed for API client, DB client,
+    and data inspector demonstrations.
+  title: Order Verification Demo API
+  version: 1.0.0
+servers:
+- url: https://api.demo.local
+tags:
+- description: Order CRUD and user verification
+  name: Orders
+- description: Admin review and approval
+  name: Admin
+paths:
+  /orders:
+    post:
+      operationId: createOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createOrder_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+          description: Order created
+      summary: Create a new order
+      tags:
+      - Orders
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: Orders
+  /orders/{id}:
+    delete:
+      operationId: deleteOrder
+      parameters:
+      - description: Order ID
+        example: ord_12345
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Order deleted
+      summary: Delete a draft order
+      tags:
+      - Orders
+      x-accepts: application/json
+      x-tags:
+      - tag: Orders
+    get:
+      operationId: getOrderById
+      parameters:
+      - description: Order ID
+        example: ord_12345
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+          description: Order detail
+      summary: Get order by ID
+      tags:
+      - Orders
+      x-accepts: application/json
+      x-tags:
+      - tag: Orders
+    patch:
+      operationId: patchOrder
+      parameters:
+      - description: Order ID
+        example: ord_12345
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Partial fields to update
+              example:
+                amount: 1999.99
+              type: object
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+          description: Patched order
+      summary: Partially update an order
+      tags:
+      - Orders
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: Orders
+    put:
+      operationId: updateOrder
+      parameters:
+      - description: Order ID
+        example: ord_12345
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateOrder_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+          description: Updated order
+      summary: Update an order (full)
+      tags:
+      - Orders
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: Orders
+  /orders/{id}/verify:
+    patch:
+      operationId: confirmOrderVerification
+      parameters:
+      - description: Order ID
+        example: ord_12345
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/confirmOrderVerification_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+          description: Order verified
+      summary: Verify order using OTP code
+      tags:
+      - Orders
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: Orders
+    post:
+      description: |
+        User submits phone number. Backend generates OTP
+        and stores it in database (mock, no SMS sent).
+      operationId: startOrderVerification
+      parameters:
+      - description: Order ID
+        example: ord_12345
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/startOrderVerification_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/startOrderVerification_200_response"
+          description: OTP generated
+      summary: Start order verification (generate OTP)
+      tags:
+      - Orders
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: Orders
+  /orders/{id}/review:
+    post:
+      operationId: reviewOrder
+      parameters:
+      - description: Order ID
+        example: ord_12345
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/reviewOrder_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+          description: Review completed
+      summary: Review and decide an order
+      tags:
+      - Admin
+      x-content-type: application/json
+      x-accepts: application/json
+      x-tags:
+      - tag: Admin
+components:
+  schemas:
+    Order:
+      description: Main order object
+      example:
+        createdAt: 2026-01-28T10:00:00Z
+        amount: 2499.99
+        phoneNumber: "+84901234567"
+        description: MacBook Pro for design team
+        currency: USD
+        id: ord_12345
+        state: UNDER_REVIEW
+        title: Laptop purchase
+        updatedAt: 2026-01-28T10:15:00Z
+      properties:
+        id:
+          description: Unique order ID
+          example: ord_12345
+          type: string
+        title:
+          description: Order title
+          example: Laptop purchase
+          type: string
+        description:
+          description: Order description
+          example: MacBook Pro for design team
+          type: string
+        amount:
+          description: Order amount
+          example: 2499.99
+          format: double
+          type: number
+        currency:
+          description: Currency code
+          example: USD
+          type: string
+        state:
+          description: Current order state
+          enum:
+          - DRAFT
+          - UNDER_REVIEW
+          - APPROVED
+          - REJECTED
+          example: UNDER_REVIEW
+          type: string
+        phoneNumber:
+          description: Phone number used for verification
+          example: "+84901234567"
+          type: string
+        createdAt:
+          description: Creation timestamp
+          example: 2026-01-28T10:00:00Z
+          format: date-time
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2026-01-28T10:15:00Z
+          format: date-time
+          type: string
+      type: object
+    createOrder_request:
+      properties:
+        title:
+          description: Short title of the order
+          example: Laptop purchase
+          type: string
+        description:
+          description: Detailed description of the order
+          example: MacBook Pro for design team
+          type: string
+        amount:
+          description: Total order amount
+          example: 2499.99
+          format: double
+          type: number
+        currency:
+          description: Currency code
+          example: USD
+          type: string
+      type: object
+    updateOrder_request:
+      properties:
+        title:
+          description: Order title
+          example: Updated laptop purchase
+          type: string
+        description:
+          description: Order description
+          example: Updated description
+          type: string
+        amount:
+          description: Order amount
+          example: 2299.99
+          format: double
+          type: number
+        currency:
+          description: Currency code
+          example: USD
+          type: string
+      type: object
+    startOrderVerification_request:
+      properties:
+        phoneNumber:
+          description: User phone number for verification
+          example: "+84901234567"
+          type: string
+      type: object
+    startOrderVerification_200_response:
+      example:
+        state: UNDER_REVIEW
+      properties:
+        state:
+          description: Current order state
+          example: UNDER_REVIEW
+          type: string
+      type: object
+    confirmOrderVerification_request:
+      properties:
+        otpCode:
+          description: OTP code generated by backend
+          example: "482913"
+          type: string
+      type: object
+    reviewOrder_request:
+      properties:
+        decision:
+          description: Review decision
+          enum:
+          - APPROVE
+          - REJECT
+          example: APPROVE
+          type: string
+        reason:
+          description: Reason for the decision
+          example: Budget approved
+          type: string
+        approvalCode:
+          description: Admin approval code stored in DB
+          example: ADM-99321
+          type: string
+      type: object

@@ -1,0 +1,121 @@
+plugins {
+    id 'java'
+    id 'io.quarkus'
+    id 'org.openapi.generator' version '7.2.0'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    implementation 'io.quarkus:quarkus-rest'
+    implementation 'io.quarkus:quarkus-rest-jackson'
+    implementation 'io.quarkus:quarkus-arc'
+    testImplementation 'io.quarkus:quarkus-junit'
+    testImplementation 'io.rest-assured:rest-assured'
+
+    // OpenAPI Generator dependencies
+    implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
+
+    // Validation
+    implementation 'io.quarkus:quarkus-hibernate-validator'
+}
+
+group = 'com.github.lactranan'
+version = '1.0.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+// OpenAPI Generator configuration
+def openApiOut = "$projectDir/api/generated/"
+openApiGenerate {
+    generatorName = 'jaxrs-spec'
+    inputSpec = "$projectDir/api/spec/order-service-demo-api.yaml".toString()
+    outputDir = openApiOut.toString()
+    apiPackage = 'com.github.lactranan.order.service.demo.v1.api'
+    modelPackage = 'com.github.lactranan.order.service.demo.v1.dto'
+    invokerPackage = 'com.github.lactranan.order.service.demo.v1.client'
+
+    // Library and generation options
+    library = 'quarkus'
+    generateApiDocumentation = true
+    generateApiTests = true
+    generateModelDocumentation = false
+    generateModelTests = false
+
+    // Additional properties for artifact metadata
+    additionalProperties = [
+            artifactDescription: 'The implementation of the order-service-demo-api-spec.',
+            artifactVersion: '1.0.0',
+            developerOrganization: 'order-service-demo-api-spec'
+    ]
+
+    // Configuration options matching legacy module exactly
+    configOptions = [
+            // Date and type handling
+            dateLibrary: 'java8',
+            fullJavaUtil: 'true',
+            bigDecimalAsString: 'true',
+            booleanGetterPrefix: 'get',
+
+            // Generation mode
+            interfaceOnly: 'true',
+            returnResponse: 'true',
+
+            // Serialization
+            serializableModel: 'true',
+
+            // Java features
+            java8: 'true',
+            asyncNative: 'false',
+
+            // Validation and annotations
+            useBeanValidation: 'true',
+            useJakartaEe: 'true',
+            useSwaggerAnnotations: 'false',
+
+            // Additional properties handling
+            disallowAdditionalPropertiesIfNotPresent: 'false',
+            openApiNullable: 'false',
+
+            // Features
+            useGzipFeature: 'true',
+            hideGenerationTimestamp: 'true',
+    ]
+}
+
+// Ensure OpenAPI code is generated before compilation
+tasks.compileJava.dependsOn tasks.openApiGenerate
+
+// Add generated directories to main source set.
+// jaxrs-spec puts java in src/gen/java (and sometimes resources in src/gen/resources).
+sourceSets {
+    main {
+        java {
+            srcDir "$openApiOut/src/gen/java"
+        }
+//        resources {
+//            srcDirs "$openApiOut/src/gen/resources"
+//        }
+    }
+}
+
+// Clean generated code
+clean {
+    delete openApiOut.toString()
+}
