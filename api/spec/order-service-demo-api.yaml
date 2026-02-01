@@ -220,9 +220,7 @@ paths:
                 type: object
                 properties:
                   state:
-                    type: string
-                    description: Order state
-                    example: UNDER_REVIEW
+                    $ref: "#/components/schemas/OrderState"
 
     patch:
       tags: [Orders]
@@ -298,6 +296,16 @@ paths:
 
 components:
   schemas:
+    OrderState:
+      type: string
+      description: Order state enum
+      enum:
+        - DRAFT
+        - UNDER_REVIEW
+        - APPROVED
+        - REJECTED
+      example: DRAFT
+
     Order:
       type: object
       description: Order aggregate
@@ -319,10 +327,7 @@ components:
           description: Currency code
           example: USD
         state:
-          type: string
-          description: Current order state
-          enum: [DRAFT, UNDER_REVIEW, APPROVED, REJECTED]
-          example: DRAFT
+          $ref: "#/components/schemas/OrderState"
         items:
           type: array
           description: Items included in the order
