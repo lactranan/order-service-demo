@@ -1,7 +1,6 @@
 package com.github.lactranan.entity;
 
 import jakarta.persistence.Embeddable;
-import java.math.BigDecimal;
 
 @Embeddable
 public class OrderItemEntity {
@@ -9,7 +8,7 @@ public class OrderItemEntity {
     private String sku;
     private String name;
     private Integer quantity;
-    private BigDecimal unitPrice;
+    private Double unitPrice;
 
     public String getSku() {
         return sku;
@@ -35,11 +34,11 @@ public class OrderItemEntity {
         this.quantity = quantity;
     }
 
-    public BigDecimal getUnitPrice() {
+    public Double getUnitPrice() {
         return unitPrice;
     }
 
-    public void setUnitPrice(BigDecimal unitPrice) {
+    public void setUnitPrice(Double unitPrice) {
         this.unitPrice = unitPrice;
     }
 }

@@ -2,32 +2,49 @@ package com.github.lactranan.api;
 
 import com.github.lactranan.order.service.demo.v1.api.OrdersApi;
 import com.github.lactranan.order.service.demo.v1.dto.*;
+import com.github.lactranan.service.OrderService;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 
+@Path("/orders")
 public class OrdersApiImpl implements OrdersApi {
 
-    @Override
-    public Response confirmOrderVerification(String id, ConfirmOrderVerificationRequest confirmOrderVerificationRequest) {
-        return null;
-    }
+    @Inject
+    OrderService orderService;
 
     @Override
     public Response createOrder(CreateOrderRequest createOrderRequest) {
-        return null;
-    }
-
-    @Override
-    public Response deleteOrder(String id) {
-        return null;
+        Order order = orderService.createOrder(createOrderRequest);
+        return Response.status(Response.Status.CREATED).entity(order).build();
     }
 
     @Override
     public Response getOrderById(String id) {
-        return null;
+        Order order = orderService.getOrderById(id);
+        return Response.ok(order).build();
+    }
+
+    @Override
+    public Response updateOrder(String id, UpdateOrderRequest updateOrderRequest) {
+        Order order = orderService.updateOrder(id, updateOrderRequest);
+        return Response.ok(order).build();
     }
 
     @Override
     public Response patchOrder(String id, PatchOrderRequest patchOrderRequest) {
+        Order order = orderService.patchOrder(id, patchOrderRequest);
+        return Response.ok(order).build();
+    }
+
+    @Override
+    public Response deleteOrder(String id) {
+        orderService.deleteOrder(id);
+        return Response.noContent().build();
+    }
+
+    @Override
+    public Response confirmOrderVerification(String id, ConfirmOrderVerificationRequest confirmOrderVerificationRequest) {
         return null;
     }
 
@@ -38,11 +55,6 @@ public class OrdersApiImpl implements OrdersApi {
 
     @Override
     public Response startOrderVerification(String id, StartOrderVerificationRequest startOrderVerificationRequest) {
-        return null;
-    }
-
-    @Override
-    public Response updateOrder(String id, UpdateOrderRequest updateOrderRequest) {
         return null;
     }
 }
