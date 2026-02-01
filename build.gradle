@@ -30,6 +30,9 @@ dependencies {
     // MapStruct
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    // H2 for testing
+    testImplementation 'io.quarkus:quarkus-jdbc-h2'
 }
 
 group = 'com.github.lactranan'
