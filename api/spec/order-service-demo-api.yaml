@@ -2,17 +2,17 @@ openapi: 3.0.3
 info:
   title: Order Verification Demo API
   description: |
-    Demo API for an order system with draft editing, OTP verification,
-    and admin review flow. Designed for API client, DB client,
-    and data inspector demonstrations.
-  version: 1.0.0
+    Demo API for an order system with draft editing, items array,
+    OTP verification, and admin review flow.
+    Designed for API client, DB client, and data inspector demonstrations.
+  version: 1.1.0
 
 servers:
   - url: https://api.demo.local
 
 tags:
   - name: Orders
-    description: Order CRUD and user verification
+    description: Order CRUD and verification
   - name: Admin
     description: Admin review and approval
 
@@ -21,13 +21,17 @@ paths:
     post:
       tags: [Orders]
       operationId: createOrder
-      summary: Create a new order
+      summary: Create a new order (draft)
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              description: Basic order information
+              required:
+                - title
+                - currency
               properties:
                 title:
                   type: string
@@ -35,20 +39,15 @@ paths:
                   example: Laptop purchase
                 description:
                   type: string
-                  description: Detailed description of the order
+                  description: Description of the order
                   example: MacBook Pro for design team
-                amount:
-                  type: number
-                  format: double
-                  description: Total order amount
-                  example: 2499.99
                 currency:
                   type: string
                   description: Currency code
                   example: USD
       responses:
         "201":
-          description: Order created
+          description: Order created in DRAFT state
           content:
             application/json:
               schema:
@@ -78,7 +77,7 @@ paths:
     put:
       tags: [Orders]
       operationId: updateOrder
-      summary: Update an order (full)
+      summary: Update an order (full replacement)
       parameters:
         - name: id
           in: path
@@ -93,6 +92,11 @@ paths:
           application/json:
             schema:
               type: object
+              description: Full order update (DRAFT only)
+              required:
+                - title
+                - currency
+                - items
               properties:
                 title:
                   type: string
@@ -102,15 +106,15 @@ paths:
                   type: string
                   description: Order description
                   example: Updated description
-                amount:
-                  type: number
-                  format: double
-                  description: Order amount
-                  example: 2299.99
                 currency:
                   type: string
                   description: Currency code
                   example: USD
+                items:
+                  type: array
+                  description: List of order items
+                  items:
+                    $ref: "#/components/schemas/OrderItem"
       responses:
         "200":
           description: Updated order
@@ -137,9 +141,25 @@ paths:
           application/json:
             schema:
               type: object
-              description: Partial fields to update
-              example:
-                amount: 1999.99
+              description: Partial update fields
+              properties:
+                title:
+                  type: string
+                  description: Order title
+                  example: Updated laptop purchase
+                description:
+                  type: string
+                  description: Order description
+                  example: Updated description
+                currency:
+                  type: string
+                  description: Currency code
+                  example: USD
+                items:
+                  type: array
+                  description: List of order items
+                  items:
+                    $ref: "#/components/schemas/OrderItem"
       responses:
         "200":
           description: Patched order
@@ -189,11 +209,11 @@ paths:
               properties:
                 phoneNumber:
                   type: string
-                  description: User phone number for verification
+                  description: Phone number for OTP verification
                   example: "+84901234567"
       responses:
         "200":
-          description: OTP generated
+          description: OTP generated and stored
           content:
             application/json:
               schema:
@@ -201,13 +221,13 @@ paths:
                 properties:
                   state:
                     type: string
-                    description: Current order state
+                    description: Order state
                     example: UNDER_REVIEW
 
     patch:
       tags: [Orders]
       operationId: confirmOrderVerification
-      summary: Verify order using OTP code
+      summary: Confirm OTP verification
       parameters:
         - name: id
           in: path
@@ -258,11 +278,11 @@ paths:
                 decision:
                   type: string
                   description: Review decision
-                  example: APPROVE
                   enum: [APPROVE, REJECT]
+                  example: APPROVE
                 reason:
                   type: string
-                  description: Reason for the decision
+                  description: Reason for decision
                   example: Budget approved
                 approvalCode:
                   type: string
@@ -280,7 +300,7 @@ components:
   schemas:
     Order:
       type: object
-      description: Main order object
+      description: Order aggregate
       properties:
         id:
           type: string
@@ -294,11 +314,6 @@ components:
           type: string
           description: Order description
           example: MacBook Pro for design team
-        amount:
-          type: number
-          format: double
-          description: Order amount
-          example: 2499.99
         currency:
           type: string
           description: Currency code
@@ -306,12 +321,13 @@ components:
         state:
           type: string
           description: Current order state
-          example: UNDER_REVIEW
-          enum:
-            - DRAFT
-            - UNDER_REVIEW
-            - APPROVED
-            - REJECTED
+          enum: [DRAFT, UNDER_REVIEW, APPROVED, REJECTED]
+          example: DRAFT
+        items:
+          type: array
+          description: Items included in the order
+          items:
+            $ref: "#/components/schemas/OrderItem"
         phoneNumber:
           type: string
           description: Phone number used for verification
@@ -325,4 +341,26 @@ components:
           type: string
           format: date-time
           description: Last update timestamp
-          example: "2026-01-28T10:15:00Z"
+          example: "2026-01-28T10:20:00Z"
+
+    OrderItem:
+      type: object
+      description: Item inside an order
+      properties:
+        sku:
+          type: string
+          description: Stock keeping unit
+          example: SKU-001
+        name:
+          type: string
+          description: Item name
+          example: MacBook Pro 14
+        quantity:
+          type: integer
+          description: Quantity ordered
+          example: 1
+        unitPrice:
+          type: number
+          format: double
+          description: Price per unit
+          example: 2499.99
