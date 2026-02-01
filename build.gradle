@@ -22,6 +22,10 @@ dependencies {
 
     // Validation
     implementation 'io.quarkus:quarkus-hibernate-validator'
+
+    // Panache + PostgreSQL
+    implementation 'io.quarkus:quarkus-hibernate-orm-panache'
+    implementation 'io.quarkus:quarkus-jdbc-postgresql'
 }
 
 group = 'com.github.lactranan'
