@@ -44,17 +44,20 @@ public class OrdersApiImpl implements OrdersApi {
     }
 
     @Override
+    public Response startOrderVerification(String id, StartOrderVerificationRequest startOrderVerificationRequest) {
+        StartOrderVerification200Response response = orderService.startOrderVerification(id, startOrderVerificationRequest);
+        return Response.ok(response).build();
+    }
+
+    @Override
     public Response confirmOrderVerification(String id, ConfirmOrderVerificationRequest confirmOrderVerificationRequest) {
-        return null;
+        Order order = orderService.confirmOrderVerification(id, confirmOrderVerificationRequest);
+        return Response.ok(order).build();
     }
 
     @Override
     public Response reviewOrder(String id, ReviewOrderRequest reviewOrderRequest) {
-        return null;
-    }
-
-    @Override
-    public Response startOrderVerification(String id, StartOrderVerificationRequest startOrderVerificationRequest) {
-        return null;
+        Order order = orderService.reviewOrder(id, reviewOrderRequest);
+        return Response.ok(order).build();
     }
 }
